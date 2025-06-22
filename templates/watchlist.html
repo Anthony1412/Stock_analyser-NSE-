@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>My Watchlist - Stock Analyzer</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <link href="/static/css/styles.css" rel="stylesheet">
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body class="bg-light">
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="/">Stock Analyzer</a>
+    </div>
+  </nav>
+
+  <div class="container py-4">
+    <h2 class="mb-4 text-center">📈 Your Watchlist</h2>
+    <div id="watchlistContainer" class="row"></div>
+  </div>
+
+  <script>
+    async function loadWatchlist() {
+      const res = await fetch('/api/watchlist');
+      const data = await res.json();
+      const container = document.getElementById('watchlistContainer');
+      container.innerHTML = '';
+
+      if (!data || data.length === 0) {
+        container.innerHTML = '<p class="text-muted text-center">No stocks added yet. Go back and add some!</p>';
+        return;
+      }
+
+      data.forEach(stock => {
+        const card = document.createElement('div');
+        card.className = 'col-md-4';
+        card.innerHTML = `
+          <div class="card mb-4 shadow-sm">
+            <div class="card-body">
+              <h5 class="card-title">${stock.name} (${stock.symbol})</h5>
+              <p><strong>Price:</strong> ₹${stock.currentPrice}</p>
+              <p><strong>Change:</strong> ${stock.change}%</p>
+              <p><strong>Sector:</strong> ${stock.sector}</p>
+              <p class="text-muted small">${stock.summary.slice(0, 100)}...</p>
+              <button class="btn btn-outline-danger btn-sm" onclick="removeFromWatchlist('${stock.symbol}')">Remove</button>
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    async function removeFromWatchlist(symbol) {
+      await fetch(`/api/watchlist/${symbol}`, { method: 'DELETE' });
+      loadWatchlist();
+    }
+
+    document.addEventListener('DOMContentLoaded', loadWatchlist);
+  </script>
+  <footer class="bg-dark text-white text-center py-4 mt-5">
+  <div class="container">
+    <p class="mb-1">&copy; {{ year | default(2025) }} Stock Analyzer. All rights reserved.</p>
+    <small>Made with ❤️ for stock enthusiasts.</small>
+  </div>
+</footer>
+</body>
+</html>

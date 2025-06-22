@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ stock.name if stock else 'Stock Analysis' }}</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <style>
+    body {
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh;
+    }
+    .card {
+      border: none;
+      border-radius: 15px;
+      overflow: hidden;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(239, 230, 230, 0.1) !important;
+    }
+    .card-header {
+      padding: 1.5rem;
+      border-bottom: none;
+    }
+    .card-body {
+      padding: 2rem;
+    }
+    .stock-header {
+      background: linear-gradient(90deg, #007bff, #00b4d8);
+      color: white;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .chart-header {
+      background: linear-gradient(90deg, #343a40, #495057);
+      color: white;
+    }
+    .stock-info {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .stock-info p {
+      margin: 0;
+      font-size: 1rem;
+      line-height: 1.6;
+    }
+    .stock-info strong {
+      color: #333;
+    }
+    .text-success {
+      color: #28a745 !important;
+      font-weight: 600;
+    }
+    .text-danger {
+      color: #dc3545 !important;
+      font-weight: 600;
+    }
+    .summary-text {
+      background: #f8f9fa;
+      padding: 1rem;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      line-height: 1.7;
+      color: #444;
+    }
+    .alert {
+      border-radius: 10px;
+      padding: 2rem;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    #chart {
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    @media (max-width: 768px) {
+      .stock-info {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  {% include 'navbar.html' %}
+
+  <div class="container py-5">
+    {% if stock %}
+      <div class="card shadow mb-5">
+        <div class="card-header stock-header">
+          <h2 class="mb-0">📈 {{ stock.name }} ({{ stock.ticker }})</h2>
+        </div>
+        <div class="card-body">
+          <div class="stock-info">
+            <p>
+              <strong>Price:</strong> ₹{{ stock.price }} 
+            </p>
+            <p>
+              <strong>Change:</strong>
+              <span class="text-{{ 'success' if stock.change >= 0 else 'danger' }}">
+                {{ stock.change }}%
+              </span>
+            </p>
+            <p><strong>Sector:</strong> {{ stock.sector }}</p>
+            <p>
+              <strong>52 Week High:</strong> ₹{{ stock.high52 }} 
+            </p>
+            <p>
+              <strong>Low:</strong> ₹{{ stock.low52 }}
+            </p>
+            <p>
+              <strong>Market Cap:</strong> ₹{{ stock.marketCap }} 
+            </p>
+            <p>
+              <strong>PE Ratio:</strong> {{ stock.pe }}
+            </p>
+            <p>
+              <strong>EPS:</strong> {{ stock.eps }} 
+            </p>
+            <p>
+              <strong>Dividend Yield:</strong> {{ stock.dividendYield }}
+            </p>
+          </div>
+          <div class="summary-text">
+            <strong>Summary:</strong> {{ stock.summary }}
+          </div>
+        </div>
+      </div>
+
+      <div class="card shadow border-0">
+        <div class="card-header chart-header">
+          <h5 class="mb-0">📊 Stock Price Chart (Last 6 Months with Bollinger Bands)</h5>
+        </div>
+        <div class="card-body">
+          <div id="chart" style="height:500px;"></div>
+        </div>
+      </div>
+
+      <script>
+        const chartData = {{ chart | tojson }};
+
+        const traceClose = {
+          x: chartData.map(d => d.Date),
+          y: chartData.map(d => d.Close),
+          type: 'scatter',
+          mode: 'lines',
+          name: 'Close Price',
+          line: { color: '#007bff' }
+        };
+
+        const traceMA20 = {
+          x: chartData.map(d => d.Date),
+          y: chartData.map(d => d.MA20),
+          type: 'scatter',
+          mode: 'lines',
+          name: 'MA20',
+          line: { dash: 'dot', color: '#ff9900' }
+        };
+
+        const traceUpper = {
+          x: chartData.map(d => d.Date),
+          y: chartData.map(d => d.Upper),
+          type: 'scatter',
+          mode: 'lines',
+          name: 'Upper Band',
+          line: { dash: 'dash', color: '#28a745' }
+        };
+
+        const traceLower = {
+          x: chartData.map(d => d.Date),
+          y: chartData.map(d => d.Lower),
+          type: 'scatter',
+          mode: 'lines',
+          name: 'Lower Band',
+          line: { dash: 'dash', color: '#dc3545' }
+        };
+
+        Plotly.newPlot('chart', [traceClose, traceMA20, traceUpper, traceLower], {
+          margin: { t: 30 },
+          xaxis: { title: 'Date', tickangle: 45 },
+          yaxis: { title: 'Price (INR)' },
+          paper_bgcolor: '#ffffff',
+          plot_bgcolor: '#ffffff',
+          showlegend: true,
+          legend: { x: 0, y: 1.1, orientation: 'h' },
+          hovermode: 'x unified'
+        });
+      </script>
+
+    {% else %}
+      <div class="alert alert-danger text-center">
+        <h2>Error loading stock data. Please check the ticker symbol and try again.</h2>
+      </div>
+    {% endif %}
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <footer class="bg-dark text-white text-center py-4 mt-5">
+  <div class="container">
+    <p class="mb-1">&copy; {{ year | default(2025) }} Stock Analyzer. All rights reserved.</p>
+    <small>Made with ❤️ for stock enthusiasts.</small>
+  </div>
+</footer>
+</body>
+</html>

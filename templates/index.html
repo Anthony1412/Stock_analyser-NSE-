@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Stock Analyzer - Home</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    body {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: #e0e0e0;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    .container {
+      padding: 4rem 0;
+    }
+    h1 {
+      font-weight: 800;
+      color: #ffffff;
+      text-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
+      letter-spacing: 1px;
+    }
+    .marquee {
+      background: #0f172a;
+      color: #a3bffa;
+      padding: 0.75rem 0;
+      font-size: 0.9rem;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+      border-bottom: 1px solid #1e3a8a;
+    }
+    .marquee span {
+      display: inline-block;
+      padding-left: 100%;
+      animation: scroll-left 25s linear infinite;
+    }
+    @keyframes scroll-left {
+      0% { transform: translateX(0%); }
+      100% { transform: translateX(-100%); }
+    }
+    .search-form {
+      max-width: 600px;
+      margin: 2.5rem auto;
+      position: relative;
+    }
+    .search-form input {
+      background: #1e293b;
+      border: 1px solid #3b82f6;
+      border-radius: 50px;
+      padding: 0.75rem 1.5rem;
+      color: #ffffff;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+    }
+    .search-form input:focus {
+      outline: none;
+      border-color: #60a5fa;
+      box-shadow: 0 0 15px rgba(96, 165, 250, 0.5);
+    }
+    .search-form button {
+      border-radius: 50px;
+      padding: 0.75rem 2rem;
+      background: linear-gradient(90deg, #3b82f6, #60a5fa);
+      border: none;
+      font-weight: 600;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .search-form button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
+    }
+    .card {
+      background: #1e293b;
+      border: none;
+      border-radius: 15px;
+      overflow: hidden;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+    }
+    .card-header {
+      background: linear-gradient(90deg, #1e3a8a, #3b82f6);
+      color: #ffffff;
+      padding: 1.25rem;
+      border-bottom: none;
+    }
+    .card-body {
+      padding: 1.75rem;
+    }
+    .stock-card {
+      background: #111827;
+      border-radius: 10px;
+      transition: all 0.3s ease;
+    }
+    .stock-card:hover {
+      background: #1e293b;
+      box-shadow: 0 0 15px rgba(96, 165, 250, 0.2);
+    }
+    .stock-card .card-title {
+      color: #a3bffa;
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+    .stock-card .card-text {
+      color:rgb(134, 174, 231);
+      font-size: 0.9rem;
+    }
+    .stock-card .btn {
+      border-radius: 50px;
+      padding: 0.5rem 1.25rem;
+      font-size: 0.875rem;
+      border-color: #3b82f6;
+      color: #3b82f6;
+      transition: all 0.3s ease;
+    }
+    .stock-card .btn:hover {
+      background: #3b82f6;
+      color: #ffffff;
+      box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+    }
+    .text-success {
+      color: #34d399 !important;
+      font-weight: 600;
+    }
+    .text-danger {
+      color: #f87171 !important;
+      font-weight: 600;
+    }
+    .top-movers {
+      margin: 2.5rem 0;
+    }
+    .top-movers .card-header {
+      background: linear-gradient(90deg, #1e3a8a, #10b981);
+    }
+    .top-movers .card-header.losers {
+      background: linear-gradient(90deg, #1e3a8a, #ef4444);
+    }
+    .top-movers .list-group-item {
+      background:rgb(100, 120, 164);
+      border: none;
+      color: #e0e0e0;
+      padding: 0.75rem 1.25rem;
+      font-size: 0.9rem;
+    }
+    .top-movers .list-group-item:hover {
+      background:rgb(109, 155, 229);
+    }
+    @media (max-width: 768px) {
+      .search-form {
+        max-width: 100%;
+      }
+      h1 {
+        font-size: 1.75rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  {% include 'navbar.html' %}
+
+  <!-- 📢 Top Gainers Marquee -->
+  <div class="marquee" id="gainers-marquee">
+    <span>Loading top gainers...</span>
+  </div>
+
+  <div class="container py-5">
+    <h1 class="mb-4 text-center"><i class="fas fa-chart-line me-2"></i>Analyze NSE Stocks</h1>
+
+    <form class="d-flex justify-content-center search-form" method="get" action="/analyze">
+      <input type="text" name="ticker" class="form-control me-2" placeholder="Enter NSE Ticker (e.g., INFY)" required />
+      <button class="btn btn-primary">Analyze</button>
+    </form>
+
+    <!-- Top Gainers and Losers Section -->
+    <div class="top-movers">
+      <div class="row g-4">
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-header">
+              <h5 class="mb-0"><i class="fas fa-arrow-up me-2"></i>Top Gainers</h5>
+            </div>
+            <div class="card-body">
+              <ul class="list-group" id="top-gainers">
+                <li class="list-group-item text-muted">Loading...</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-header losers">
+              <h5 class="mb-0"><i class="fas fa-arrow-down me-2"></i>Top Losers</h5>
+            </div>
+            <div class="card-body">
+              <ul class="list-group" id="top-losers">
+                <li class="list-group-item text-muted">Loading...</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card shadow-sm mt-5">
+      <div class="card-header">
+        <h5 class="mb-0"><i class="fas fa-fire me-2"></i>Trending Stocks (NSE)</h5>
+      </div>
+      <div class="card-body">
+        <div class="row" id="trending-stocks">
+          <p class="text-muted">Loading...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    async function fetchTrending() {
+      const res = await fetch('/api/trending');
+      const data = await res.json();
+      const container = document.getElementById('trending-stocks');
+      container.innerHTML = '';
+      data.forEach(stock => {
+        const card = document.createElement('div');
+        card.className = 'col-md-4 mb-3';
+        card.innerHTML = `
+          <div class="card stock-card border-light">
+            <div class="card-body">
+              <h5 class="card-title">${stock.ticker}</h5>
+              <p class="card-text">Price: ₹${stock.price.toFixed(2)}</p>
+              <p class="card-text text-${stock.change >= 0 ? 'success' : 'danger'}">
+                Change: ${stock.change.toFixed(2)}%
+              </p>
+              <a href="/analyze?ticker=${stock.ticker}" class="btn btn-sm btn-outline-primary">Analyze</a>
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    async function fetchGainers() {
+      const res = await fetch('/api/trending');
+      const data = await res.json();
+      const topGainers = data
+        .sort((a, b) => b.change - a.change)
+        .slice(0, 5)
+        .map(stock => `${stock.ticker}: ₹${stock.price.toFixed(2)} (+${stock.change.toFixed(2)}%)`)
+        .join(' 🔺 ');
+      document.getElementById('gainers-marquee').innerHTML = `<span>${topGainers}</span>`;
+    }
+
+    async function fetchTopMovers() {
+      try {
+        const res = await fetch('/api/trending');
+        const data = await res.json();
+
+        // Top Gainers
+        const gainers = data
+          .sort((a, b) => b.change - a.change)
+          .slice(0, 3);
+        const gainersContainer = document.getElementById('top-gainers');
+        gainersContainer.innerHTML = '';
+        gainers.forEach(stock => {
+          const item = document.createElement('li');
+          item.className = 'list-group-item';
+          item.innerHTML = `
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <strong>${stock.ticker}</strong>
+                <p class="mb-0 text-muted">Price: ₹${stock.price.toFixed(2)}</p>
+              </div>
+              <span class="text-success">+${stock.change.toFixed(2)}%</span>
+            </div>
+          `;
+          gainersContainer.appendChild(item);
+        });
+
+        // Top Losers
+        const losers = data
+          .sort((a, b) => a.change - b.change)
+          .slice(0, 3);
+        const losersContainer = document.getElementById('top-losers');
+        losersContainer.innerHTML = '';
+        losers.forEach(stock => {
+          const item = document.createElement('li');
+          item.className = 'list-group-item';
+          item.innerHTML = `
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <strong>${stock.ticker}</strong>
+                <p class="mb-0 text-muted">Price: ₹${stock.price.toFixed(2)}</p>
+              </div>
+              <span class="text-danger">${stock.change.toFixed(2)}%</span>
+            </div>
+          `;
+          losersContainer.appendChild(item);
+        });
+      } catch (error) {
+        console.error('Error fetching top movers:', error);
+        document.getElementById('top-gainers').innerHTML = '<li class="list-group-item text-danger">Error loading data</li>';
+        document.getElementById('top-losers').innerHTML = '<li class="list-group-item text-danger">Error loading data</li>';
+      }
+    }
+
+    fetchTrending();
+    fetchGainers();
+    fetchTopMovers();
+  </script>
+  <footer class="bg-dark text-white text-center py-4 mt-5">
+  <div class="container">
+    <p class="mb-1">&copy; {{ year | default(2025) }} Stock Analyzer. All rights reserved.</p>
+    <small>Made with ❤️ for stock enthusiasts.</small>
+  </div>
+</footer>
+
+</body>
+</html>

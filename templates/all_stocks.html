@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>All NSE Stocks</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    body {
+      background: linear-gradient(135deg, #e6f0fa 0%, #b3d4fc 100%);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh;
+      color: #333;
+    }
+    .container {
+      padding-top: 3rem;
+      padding-bottom: 3rem;
+    }
+    .header-section {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2.5rem;
+    }
+    .header-section h2 {
+      font-weight: 700;
+      color: #1a3c6e;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .search-bar {
+      position: relative;
+      max-width: 500px;
+      margin: 1.5rem auto;
+    }
+    .search-bar input {
+      border-radius: 50px;
+      padding: 0.75rem 2.5rem 0.75rem 1.25rem;
+      border: 1px solid #ced4da;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      transition: all 0.3s ease;
+    }
+    .search-bar input:focus {
+      border-color: #0d6efd;
+      box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.1);
+    }
+    .search-bar i {
+      position: absolute;
+      right: 1.25rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #6c757d;
+    }
+    .stock-card {
+      border-radius: 15px;
+      overflow: hidden;
+      background: #fff;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      border: none;
+    }
+    .stock-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+    }
+    .stock-card .card-body {
+      padding: 1.75rem;
+    }
+    .stock-card .card-title {
+      color: #0d6efd;
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    .stock-card .card-subtitle {
+      color: #6c757d;
+      font-size: 0.95rem;
+      margin-bottom: 1rem;
+    }
+    .stock-card p {
+      font-size: 0.9rem;
+      margin-bottom: 0.75rem;
+      color: #444;
+    }
+    .stock-card p strong {
+      color: #333;
+    }
+    .stock-card .btn {
+      border-radius: 50px;
+      padding: 0.5rem 1.25rem;
+      font-size: 0.875rem;
+      transition: background-color 0.3s ease;
+    }
+    .alert {
+      border-radius: 10px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      margin-top: 2rem;
+    }
+    @media (max-width: 768px) {
+      .header-section {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+      }
+      .search-bar {
+        max-width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header-section">
+      <h2><i class="fas fa-database text-primary"></i>All NSE Stocks</h2>
+      <a href="/" class="btn btn-outline-secondary btn-sm px-3">← Home</a>
+    </div>
+
+    <div class="search-bar">
+      <input
+        type="text"
+        id="searchInput"
+        class="form-control"
+        placeholder="Search by company name or symbol..."
+        onkeyup="filterStocks()"
+      />
+      <i class="fas fa-search"></i>
+    </div>
+
+    <div id="stockCards" class="row g-4">
+      <!-- Stock cards will be injected here -->
+    </div>
+  </div>
+
+  <script>
+    async function fetchAllStocks() {
+      try {
+        const res = await fetch('/api/stocks');
+        if (!res.ok) throw new Error("Network response not ok");
+        const stocks = await res.json();
+        const container = document.getElementById('stockCards');
+        container.innerHTML = '';
+
+        stocks.forEach(stock => {
+          const card = document.createElement('div');
+          card.className = 'col-md-4';
+          card.innerHTML = `
+            <div class="card stock-card shadow-sm">
+              <div class="card-body">
+                <h5 class="card-title">${stock.symbol}</h5>
+                <h6 class="card-subtitle mb-2">${stock.name}</h6>
+                <p><strong>Sector:</strong> ${stock.sector}</p>
+                <p><strong>Price:</strong> ₹${stock.currentPrice}</p>
+                <p><strong>P/E Ratio:</strong> ${stock.peRatio || 'N/A'}</p>
+                <a href="/analyze?ticker=${stock.symbol}" class="btn btn-outline-primary">Analyze</a>
+              </div>
+            </div>
+          `;
+          container.appendChild(card);
+        });
+      } catch (error) {
+        console.error("Fetch failed:", error);
+        document.getElementById('stockCards').innerHTML = `
+          <div class="col-12">
+            <div class="alert alert-danger text-center">
+              Failed to load stock data. Please ensure the API is running at <code>/api/stocks</code>.
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    function filterStocks() {
+      const input = document.getElementById('searchInput').value.toUpperCase();
+      const cards = document.querySelectorAll('#stockCards .card');
+      cards.forEach(card => {
+        const text = card.textContent.toUpperCase();
+        card.parentElement.style.display = text.includes(input) ? '' : 'none';
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', fetchAllStocks);
+  </script>
+  <footer class="bg-dark text-white text-center py-4 mt-5">
+  <div class="container">
+    <p class="mb-1">&copy; {{ year | default(2025) }} Stock Analyzer. All rights reserved.</p>
+    <small>Made with ❤️ for stock enthusiasts.</small>
+  </div>
+</footer>
+</body>
+</html>
