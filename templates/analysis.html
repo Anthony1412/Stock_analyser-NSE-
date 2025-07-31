@@ -62,6 +62,10 @@
       color: #dc3545 !important;
       font-weight: 600;
     }
+    .text-warning {
+      color: #ffc107 !important;
+      font-weight: 600;
+    }
     .summary-text {
       background: #f8f9fa;
       padding: 1rem;
@@ -79,6 +83,9 @@
       border-radius: 10px;
       overflow: hidden;
     }
+    .threshold-form {
+      margin-bottom: 1rem;
+    }
     @media (max-width: 768px) {
       .stock-info {
         grid-template-columns: 1fr;
@@ -93,56 +100,125 @@
     {% if stock %}
       <div class="card shadow mb-5">
         <div class="card-header stock-header">
-          <h2 class="mb-0">📈 {{ stock.name }} ({{ stock.ticker }})</h2>
+          <h2 class="mb-0">📈 {{ stock.name | default('Unknown Stock') }} ({{ stock.ticker | default('N/A') }})</h2>
         </div>
         <div class="card-body">
           <div class="stock-info">
             <p>
-              <strong>Price:</strong> ₹{{ stock.price }} 
+              <strong>Price:</strong> ₹{{ stock.price | default('N/A') }} 
             </p>
             <p>
               <strong>Change:</strong>
               <span class="text-{{ 'success' if stock.change >= 0 else 'danger' }}">
-                {{ stock.change }}%
+                {{ stock.change | default('N/A') }}%
               </span>
             </p>
-            <p><strong>Sector:</strong> {{ stock.sector }}</p>
+            <p><strong>Sector:</strong> {{ stock.sector | default('N/A') }}</p>
             <p>
-              <strong>52 Week High:</strong> ₹{{ stock.high52 }} 
+              <strong>52 Week High:</strong> ₹{{ stock.high52 | default('N/A') }} 
             </p>
             <p>
-              <strong>Low:</strong> ₹{{ stock.low52 }}
+              <strong>Low:</strong> ₹{{ stock.low52 | default('N/A') }}
             </p>
             <p>
-              <strong>Market Cap:</strong> ₹{{ stock.marketCap }} 
+              <strong>Market Cap:</strong> ₹{{ stock.marketCap | default('N/A') }} 
             </p>
             <p>
-              <strong>PE Ratio:</strong> {{ stock.pe }}
+              <strong>PE Ratio:</strong> {{ stock.pe | default('N/A') }}
             </p>
             <p>
-              <strong>EPS:</strong> {{ stock.eps }} 
+              <strong>EPS:</strong> {{ stock.eps | default('N/A') }} 
             </p>
             <p>
-              <strong>Dividend Yield:</strong> {{ stock.dividendYield }}
+              <strong>Dividend Yield:</strong> {{ stock.dividendYield | default('N/A') }}
             </p>
           </div>
           <div class="summary-text">
-            <strong>Summary:</strong> {{ stock.summary }}
+            <strong>Summary:</strong> {{ stock.summary | default('No summary available.') }}
           </div>
         </div>
       </div>
 
       <div class="card shadow border-0">
         <div class="card-header chart-header">
-          <h5 class="mb-0">📊 Stock Price Chart (Last 6 Months with Bollinger Bands)</h5>
+          <h5 class="mb-0">📊 Stock Price Chart (Last 6 Months with Bollinger Bands & 30-Day Prediction)</h5>
         </div>
         <div class="card-body">
+          <div class="threshold-form">
+            <div class="input-group mb-3">
+              <input type="number" class="form-control" id="threshold-input" placeholder="Enter threshold price (INR)" value="{{ stock.price | default('') }}">
+              <button class="btn btn-primary" onclick="updatePredictionAlert()">Update</button>
+              <button class="btn btn-outline-secondary" onclick="togglePrediction()">Toggle Prediction</button>
+            </div>
+          </div>
           <div id="chart" style="height:500px;"></div>
+          <div id="prediction-alert" class="alert mt-3" style="display: none;"></div>
         </div>
       </div>
 
       <script>
-        const chartData = {{ chart | tojson }};
+        const chartData = {{ chart | tojson | safe }};
+
+        // Initialize prediction visibility
+        let showPrediction = true;
+
+        // Find last closing price and final predicted price/range
+        const lastClose = chartData.find(d => d.Close !== null && d.Close !== undefined)?.Close;
+        const finalPredictedData = chartData.filter(d => d.Predicted !== null && d.Predicted !== undefined).slice(-1)[0] || {};
+        const finalPredicted = finalPredictedData.Predicted;
+        const finalPredictedLower = finalPredictedData.PredictedLower;
+        const finalPredictedUpper = finalPredictedData.PredictedUpper;
+        const lastHistoricalDate = chartData.find(d => d.Close !== null && d.Close !== undefined)?.Date;
+        const predictionStartDate = chartData.find(d => d.Predicted !== null && d.Predicted !== undefined)?.Date;
+
+        // Function to update profit/loss alert
+        function updatePredictionAlert() {
+          const threshold = parseFloat(document.getElementById('threshold-input').value) || lastClose;
+          const alertDiv = document.getElementById('prediction-alert');
+          alertDiv.style.display = 'block';
+
+          if (!finalPredicted || !threshold) {
+            alertDiv.className = 'alert alert-warning mt-3';
+            alertDiv.innerHTML = `
+              <strong>Warning:</strong> Unable to calculate prediction. No valid data available. <br>
+              <small>Note: Predictions are estimates and not financial advice.</small>
+            `;
+            return;
+          }
+
+          const changePercent = ((finalPredicted - threshold) / threshold * 100).toFixed(2);
+          if (finalPredictedLower > threshold) {
+            alertDiv.className = 'alert alert-success mt-3';
+            alertDiv.innerHTML = `
+              <strong>Potential Profit:</strong> Predicted price in 30 days is ₹${finalPredicted.toFixed(2)} 
+              (+${changePercent}%, Range: ₹${finalPredictedLower.toFixed(2)} - ₹${finalPredictedUpper.toFixed(2)}). <br>
+              <small>Note: Predictions are estimates and not financial advice.</small>
+            `;
+          } else if (finalPredictedUpper < threshold) {
+            alertDiv.className = 'alert alert-danger mt-3';
+            alertDiv.innerHTML = `
+              <strong>Potential Loss:</strong> Predicted price in 30 days is ₹${finalPredicted.toFixed(2)} 
+              (${changePercent}%, Range: ₹${finalPredictedLower.toFixed(2)} - ₹${finalPredictedUpper.toFixed(2)}). <br>
+              <small>Note: Predictions are estimates and not financial advice.</small>
+            `;
+          } else {
+            alertDiv.className = 'alert alert-warning mt-3';
+            alertDiv.innerHTML = `
+              <strong>Uncertain Outcome:</strong> Predicted price in 30 days is ₹${finalPredicted.toFixed(2)} 
+              (${changePercent}%, Range: ₹${finalPredictedLower.toFixed(2)} - ₹${finalPredictedUpper.toFixed(2)} crosses threshold ₹${threshold.toFixed(2)}). <br>
+              <small>Note: Predictions are estimates and not financial advice.</small>
+            `;
+          }
+        }
+
+        // Function to toggle prediction visibility
+        function togglePrediction() {
+          showPrediction = !showPrediction;
+          const traces = showPrediction ? 
+            [traceClose, traceMA20, traceUpper, traceLower, tracePredicted, tracePredictedBand, tracePredictionStart] : 
+            [traceClose, traceMA20, traceUpper, traceLower];
+          Plotly.newPlot('chart', traces, layout);
+        }
 
         const traceClose = {
           x: chartData.map(d => d.Date),
@@ -150,7 +226,8 @@
           type: 'scatter',
           mode: 'lines',
           name: 'Close Price',
-          line: { color: '#007bff' }
+          line: { color: '#007bff' },
+          hovertemplate: '%{y:.2f} INR<extra></extra>'
         };
 
         const traceMA20 = {
@@ -159,7 +236,8 @@
           type: 'scatter',
           mode: 'lines',
           name: 'MA20',
-          line: { dash: 'dot', color: '#ff9900' }
+          line: { dash: 'dot', color: '#ff9900' },
+          hovertemplate: '%{y:.2f} INR<extra></extra>'
         };
 
         const traceUpper = {
@@ -168,7 +246,8 @@
           type: 'scatter',
           mode: 'lines',
           name: 'Upper Band',
-          line: { dash: 'dash', color: '#28a745' }
+          line: { dash: 'dash', color: '#28a745' },
+          hovertemplate: '%{y:.2f} INR<extra></extra>'
         };
 
         const traceLower = {
@@ -177,10 +256,45 @@
           type: 'scatter',
           mode: 'lines',
           name: 'Lower Band',
-          line: { dash: 'dash', color: '#dc3545' }
+          line: { dash: 'dash', color: '#dc3545' },
+          hovertemplate: '%{y:.2f} INR<extra></extra>'
         };
 
-        Plotly.newPlot('chart', [traceClose, traceMA20, traceUpper, traceLower], {
+        const tracePredicted = {
+          x: chartData.map(d => d.Date),
+          y: chartData.map(d => d.Predicted),
+          type: 'scatter',
+          mode: 'lines',
+          name: 'Predicted Price',
+          line: { dash: 'dash', color: '#9333ea', width: 3 },
+          hovertemplate: 'Predicted: %{y:.2f} INR<br>Range: %{customdata[0]:.2f} - %{customdata[1]:.2f} INR<extra></extra>',
+          customdata: chartData.map(d => [d.PredictedLower, d.PredictedUpper])
+        };
+
+        const tracePredictedBand = {
+          x: chartData.map(d => d.Date).concat(chartData.map(d => d.Date).reverse()),
+          y: chartData.map(d => d.PredictedUpper).concat(chartData.map(d => d.PredictedLower).reverse()),
+          type: 'scatter',
+          mode: 'none',
+          fill: 'toself',
+          fillcolor: 'rgba(147, 51, 234, 0.3)',
+          name: 'Prediction Range',
+          showlegend: true,
+          hoverinfo: 'skip'
+        };
+
+        const tracePredictionStart = {
+          x: [predictionStartDate, predictionStartDate],
+          y: [Math.min(...chartData.map(d => d.Lower || d.PredictedLower || Infinity).filter(v => v !== null)), 
+               Math.max(...chartData.map(d => d.Upper || d.PredictedUpper || -Infinity).filter(v => v !== null))],
+          type: 'scatter',
+          mode: 'lines',
+          name: 'Prediction Start',
+          line: { color: '#6b7280', width: 2 },
+          hoverinfo: 'skip'
+        };
+
+        const layout = {
           margin: { t: 30 },
           xaxis: { title: 'Date', tickangle: 45 },
           yaxis: { title: 'Price (INR)' },
@@ -188,10 +302,27 @@
           plot_bgcolor: '#ffffff',
           showlegend: true,
           legend: { x: 0, y: 1.1, orientation: 'h' },
-          hovermode: 'x unified'
-        });
-      </script>
+          hovermode: 'x unified',
+          annotations: finalPredicted ? [{
+            x: chartData[chartData.length - 1].Date,
+            y: finalPredicted,
+            xref: 'x',
+            yref: 'y',
+            text: `Predicted: ₹${finalPredicted.toFixed(2)}<br>Range: ₹${finalPredictedLower.toFixed(2)} - ₹${finalPredictedUpper.toFixed(2)}`,
+            showarrow: true,
+            arrowhead: 2,
+            ax: -30,
+            ay: -30,
+            bgcolor: 'rgba(147, 51, 234, 0.8)',
+            font: { color: '#ffffff' }
+          }] : []
+        };
 
+        Plotly.newPlot('chart', [traceClose, traceMA20, traceUpper, traceLower, tracePredicted, tracePredictedBand, tracePredictionStart], layout);
+
+        // Initialize alert
+        updatePredictionAlert();
+      </script>
     {% else %}
       <div class="alert alert-danger text-center">
         <h2>Error loading stock data. Please check the ticker symbol and try again.</h2>
@@ -201,10 +332,10 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <footer class="bg-dark text-white text-center py-4 mt-5">
-  <div class="container">
-    <p class="mb-1">&copy; {{ year | default(2025) }} Stock Analyzer. All rights reserved.</p>
-    <small>Made with ❤️ for stock enthusiasts.</small>
-  </div>
-</footer>
+    <div class="container">
+      <p class="mb-1">© {{ year | default(2025) }} Stock Analyzer. All rights reserved.</p>
+      <small>Made with ❤️ for stock enthusiasts. designed and developed by tony</small>
+    </div>
+  </footer>
 </body>
 </html>

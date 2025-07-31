@@ -1,326 +1,1139 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-bs-theme="light">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Stock Analyzer - Home</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --primary-light: #4361ee;
+      --primary-dark: #3a56e4;
+      --secondary-light: #3f37c9;
+      --secondary-dark: #2b2d42;
+      --success-light: #4cc9f0;
+      --success-dark: #4895ef;
+      --danger-light: #f72585;
+      --danger-dark: #b5179e;
+      --warning-light: #f8961e;
+      --warning-dark: #f3722c;
+      --info-light: #90e0ef;
+      --info-dark: #00b4d8;
+      --light-bg: #f8f9fa;
+      --dark-bg: #121212;
+      --card-bg-light: #ffffff;
+      --card-bg-dark: #1e1e1e;
+      --text-light: #212529;
+      --text-dark: #f8f9fa;
+      --border-light: #dee2e6;
+      --border-dark: #333333;
+    }
+    
+    [data-bs-theme="light"] {
+      --primary: var(--primary-light);
+      --secondary: var(--secondary-light);
+      --success: var(--success-light);
+      --danger: var(--danger-light);
+      --warning: var(--warning-light);
+      --info: var(--info-light);
+      --bg-color: var(--light-bg);
+      --card-bg: var(--card-bg-light);
+      --text-color: var(--text-light);
+      --border-color: var(--border-light);
+      --header-bg: linear-gradient(135deg, var(--secondary-light) 0%, var(--primary-light) 100%);
+      --footer-bg: linear-gradient(135deg, var(--secondary-light) 0%, var(--primary-light) 100%);
+    }
+    
+    [data-bs-theme="dark"] {
+      --primary: var(--primary-dark);
+      --secondary: var(--secondary-dark);
+      --success: var(--success-dark);
+      --danger: var(--danger-dark);
+      --warning: var(--warning-dark);
+      --info: var(--info-dark);
+      --bg-color: var(--dark-bg);
+      --card-bg: var(--card-bg-dark);
+      --text-color: var(--text-dark);
+      --border-color: var(--border-dark);
+      --header-bg: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      --footer-bg: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    }
+    
     body {
-      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      color: #e0e0e0;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
       min-height: 100vh;
-      overflow-x: hidden;
+      transition: background-color 0.3s ease, color 0.3s ease;
+      padding-bottom: 60px; /* Added to prevent footer overlap */
     }
+    
     .container {
-      padding: 4rem 0;
+      padding: 2rem 0;
+      max-width: 1400px; /* Added for better content width */
     }
-    h1 {
-      font-weight: 800;
-      color: #ffffff;
-      text-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
-      letter-spacing: 1px;
+    
+    /* Header Styles */
+    header {
+      background: var(--header-bg);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      transition: all 0.3s ease;
     }
-    .marquee {
-      background: #0f172a;
-      color: #a3bffa;
-      padding: 0.75rem 0;
-      font-size: 0.9rem;
+    
+    .navbar-brand {
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+    }
+    
+    .navbar-brand i {
+      margin-right: 10px;
+      font-size: 1.2rem;
+    }
+    
+    .nav-link {
+      transition: all 0.3s ease;
       font-weight: 500;
-      white-space: nowrap;
-      overflow: hidden;
-      box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
-      border-bottom: 1px solid #1e3a8a;
+      display: flex;
+      align-items: center;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      white-space: nowrap; /* Prevent text wrapping */
     }
-    .marquee span {
+    
+    .nav-link i {
+      margin-right: 8px;
+      font-size: 0.9rem;
+    }
+    
+    .nav-link:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+      transform: translateY(-2px);
+    }
+    
+    .active-nav {
+      background-color: rgba(255, 255, 255, 0.2);
+      font-weight: 600;
+    }
+    
+    /* Theme Toggle */
+    .theme-toggle {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+      margin-left: 15px;
+    }
+    
+    .theme-toggle:hover {
+      transform: rotate(30deg) scale(1.1);
+    }
+    
+    /* Marquee Styles */
+    .marquee-container {
+      background: var(--card-bg);
+      color: var(--text-color);
+      padding: 0;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+      margin-bottom: 2rem;
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+      transition: all 0.3s ease;
+    }
+    
+    .marquee {
+      padding: 1rem 0;
+      font-weight: 500;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+    }
+    
+    .marquee-content {
       display: inline-block;
       padding-left: 100%;
       animation: scroll-left 25s linear infinite;
+      white-space: nowrap;
     }
+    
+    .market-status {
+      padding: 0.75rem 1.5rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      background: var(--primary);
+      color: white;
+      display: inline-block;
+      margin-right: 1.5rem;
+      border-radius: 8px;
+      flex-shrink: 0;
+    }
+    
     @keyframes scroll-left {
-      0% { transform: translateX(0%); }
+      0% { transform: translateX(0); }
       100% { transform: translateX(-100%); }
     }
-    .search-form {
-      max-width: 600px;
-      margin: 2.5rem auto;
+    
+    /* Search Form */
+    .search-container {
+      max-width: 800px;
+      margin: 2rem auto;
       position: relative;
     }
-    .search-form input {
-      background: #1e293b;
-      border: 1px solid #3b82f6;
+    
+    .search-form {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .search-input {
       border-radius: 50px;
-      padding: 0.75rem 1.5rem;
-      color: #ffffff;
-      font-size: 1rem;
+      padding: 1rem 1.5rem;
+      border: 1px solid var(--border-color);
+      background: var(--card-bg);
+      color: var(--text-color);
       transition: all 0.3s ease;
-      box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+      flex-grow: 1;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
     }
-    .search-form input:focus {
-      outline: none;
-      border-color: #60a5fa;
-      box-shadow: 0 0 15px rgba(96, 165, 250, 0.5);
+    
+    .search-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.25);
     }
-    .search-form button {
+    
+    .search-btn {
       border-radius: 50px;
-      padding: 0.75rem 2rem;
-      background: linear-gradient(90deg, #3b82f6, #60a5fa);
-      border: none;
       font-weight: 600;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-    .search-form button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
-    }
-    .card {
-      background: #1e293b;
+      padding: 1rem 2rem;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
       border: none;
-      border-radius: 15px;
-      overflow: hidden;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
+    
+    .search-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(67, 97, 238, 0.4);
+      background: linear-gradient(135deg, var(--secondary), var(--primary));
+    }
+    
+    .search-btn i {
+      margin-right: 8px;
+    }
+    
+    /* Card Styles */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+      transition: all 0.3s ease;
+      height: 100%;
+    }
+    
     .card:hover {
       transform: translateY(-8px);
-      box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
     }
+    
     .card-header {
-      background: linear-gradient(90deg, #1e3a8a, #3b82f6);
-      color: #ffffff;
-      padding: 1.25rem;
-      border-bottom: none;
+      border-radius: 16px 16px 0 0 !important;
+      border-bottom: 1px solid var(--border-color);
+      padding: 1.25rem 1.5rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
     }
-    .card-body {
-      padding: 1.75rem;
+    
+    .card-header i {
+      margin-right: 10px;
+      font-size: 1.1rem;
     }
+    
+    .card-header.gainers {
+      background: linear-gradient(135deg, var(--success), #4cc9f0);
+      color: white;
+    }
+    
+    .card-header.losers {
+      background: linear-gradient(135deg, var(--danger), #f72585);
+      color: white;
+    }
+    
+    .card-header.trending {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+    }
+    
+    /* Stock Card Styles */
     .stock-card {
-      background: #111827;
-      border-radius: 10px;
+      height: 100%;
       transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
     }
+    
+    .stock-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+    }
+    
     .stock-card:hover {
-      background: #1e293b;
-      box-shadow: 0 0 15px rgba(96, 165, 250, 0.2);
+      transform: translateY(-5px);
+      box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
     }
+    
     .stock-card .card-title {
-      color: #a3bffa;
-      font-size: 1.25rem;
+      color: var(--primary);
       font-weight: 700;
+      margin-bottom: 0.5rem;
     }
+    
     .stock-card .card-text {
-      color:rgb(134, 174, 231);
-      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
     }
-    .stock-card .btn {
+    
+    .stock-card .price {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin: 0.5rem 0;
+    }
+    
+    .stock-card .change {
+      font-weight: 600;
+      padding: 0.25rem 0.75rem;
       border-radius: 50px;
-      padding: 0.5rem 1.25rem;
-      font-size: 0.875rem;
-      border-color: #3b82f6;
-      color: #3b82f6;
+      display: inline-block;
+    }
+    
+    .stock-card .positive {
+      background-color: rgba(76, 201, 240, 0.15);
+      color: var(--success);
+    }
+    
+    .stock-card .negative {
+      background-color: rgba(247, 37, 133, 0.15);
+      color: var(--danger);
+    }
+    
+    /* List Group Styles */
+    .list-group-item {
+      border: 1px solid var(--border-color);
+      border-radius: 10px !important;
+      margin-bottom: 0.75rem;
+      transition: all 0.3s ease;
+      background: var(--card-bg);
+      padding: 1rem 1.25rem;
+    }
+    
+    .list-group-item:hover {
+      transform: translateX(5px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .list-group-item .ticker {
+      font-weight: 600;
+      color: var(--primary);
+    }
+    
+    .list-group-item .name {
+      font-size: 0.85rem;
+      color: var(--text-color);
+      opacity: 0.8;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 200px;
+    }
+    
+    .list-group-item .price {
+      font-weight: 600;
+    }
+    
+    /* Footer Styles */
+    footer {
+      background: var(--footer-bg);
+      color: white;
+      padding: 2rem 0;
+      margin-top: 4rem;
+      position: relative;
+      bottom: 0;
+      width: 100%;
+    }
+    
+    .footer-content {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .footer-text {
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 0.95rem;
+    }
+    
+    .footer-heart {
+      color: #ff6b6b;
+      margin: 0 4px;
+    }
+    
+    /* Market Summary */
+    .market-summary {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+    
+    .summary-card {
+      flex: 1;
+      min-width: 200px;
+      padding: 1.5rem;
+      border-radius: 12px;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .summary-card::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+    }
+    
+    .summary-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+    
+    .summary-card .title {
+      font-size: 0.9rem;
+      color: var(--text-color);
+      opacity: 0.8;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+    }
+    
+    .summary-card .title i {
+      margin-right: 8px;
+      font-size: 1rem;
+    }
+    
+    .summary-card .value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+    
+    .summary-card .change {
+      font-size: 0.9rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+    }
+    
+    .summary-card .change i {
+      margin-right: 5px;
+    }
+    
+    /* Market News */
+    .news-card {
+      height: 100%;
       transition: all 0.3s ease;
     }
-    .stock-card .btn:hover {
-      background: #3b82f6;
-      color: #ffffff;
-      box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+    
+    .news-card:hover {
+      transform: translateY(-5px);
     }
-    .text-success {
-      color: #34d399 !important;
+    
+    .news-card .card-title {
       font-weight: 600;
+      margin-bottom: 0.75rem;
     }
-    .text-danger {
-      color: #f87171 !important;
-      font-weight: 600;
-    }
-    .top-movers {
-      margin: 2.5rem 0;
-    }
-    .top-movers .card-header {
-      background: linear-gradient(90deg, #1e3a8a, #10b981);
-    }
-    .top-movers .card-header.losers {
-      background: linear-gradient(90deg, #1e3a8a, #ef4444);
-    }
-    .top-movers .list-group-item {
-      background:rgb(100, 120, 164);
-      border: none;
-      color: #e0e0e0;
-      padding: 0.75rem 1.25rem;
+    
+    .news-card .card-text {
+      color: var(--text-color);
+      opacity: 0.8;
       font-size: 0.9rem;
+      margin-bottom: 1rem;
     }
-    .top-movers .list-group-item:hover {
-      background:rgb(109, 155, 229);
+    
+    .news-card .news-time {
+      font-size: 0.8rem;
+      color: var(--text-color);
+      opacity: 0.6;
     }
-    @media (max-width: 768px) {
+    
+    /* Responsive Adjustments */
+    @media (max-width: 992px) {
       .search-form {
-        max-width: 100%;
+        flex-direction: column;
       }
-      h1 {
-        font-size: 1.75rem;
+      
+      .search-btn {
+        width: 100%;
       }
+      
+      .market-summary {
+        flex-direction: column;
+      }
+      
+      .summary-card {
+        width: 100%;
+      }
+      
+      .navbar-collapse {
+        padding-top: 1rem;
+      }
+      
+      .nav-link {
+        margin-bottom: 0.5rem;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .container {
+        padding: 2rem 1rem;
+      }
+      
+      .marquee-content {
+        font-size: 0.85rem;
+      }
+      
+      .market-status {
+        display: none;
+      }
+      
+      .summary-card .value {
+        font-size: 1.3rem;
+      }
+    }
+    
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .fade-in {
+      animation: fadeIn 0.6s ease forwards;
+    }
+    
+    .delay-1 { animation-delay: 0.1s; }
+    .delay-2 { animation-delay: 0.2s; }
+    .delay-3 { animation-delay: 0.3s; }
+    .delay-4 { animation-delay: 0.4s; }
+    .delay-5 { animation-delay: 0.5s; }
+    
+    /* Blinking animation for real-time updates */
+    @keyframes blink {
+      0% { opacity: 0.5; }
+      50% { opacity: 1; }
+      100% { opacity: 0.5; }
+    }
+    
+    .updating {
+      animation: blink 1.5s infinite;
     }
   </style>
 </head>
 <body>
-  {% include 'navbar.html' %}
-
-  <!-- 📢 Top Gainers Marquee -->
-  <div class="marquee" id="gainers-marquee">
-    <span>Loading top gainers...</span>
-  </div>
-
-  <div class="container py-5">
-    <h1 class="mb-4 text-center"><i class="fas fa-chart-line me-2"></i>Analyze NSE Stocks</h1>
-
-    <form class="d-flex justify-content-center search-form" method="get" action="/analyze">
-      <input type="text" name="ticker" class="form-control me-2" placeholder="Enter NSE Ticker (e.g., INFY)" required />
-      <button class="btn btn-primary">Analyze</button>
-    </form>
-
-    <!-- Top Gainers and Losers Section -->
-    <div class="top-movers">
-      <div class="row g-4">
-        <div class="col-md-6">
-          <div class="card">
-            <div class="card-header">
-              <h5 class="mb-0"><i class="fas fa-arrow-up me-2"></i>Top Gainers</h5>
-            </div>
-            <div class="card-body">
-              <ul class="list-group" id="top-gainers">
-                <li class="list-group-item text-muted">Loading...</li>
-              </ul>
-            </div>
+  <header class="py-2 py-lg-3">
+    <div class="container">
+      <nav class="navbar navbar-expand-lg">
+        <div class="container-fluid">
+          <a class="navbar-brand text-white" href="{{ url_for('home') }}">
+            <i class="fas fa-chart-line"></i>Stock Analyzer
+          </a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto align-items-lg-center">
+              <li class="nav-item">
+                <a class="nav-link text-white active-nav" href="{{ url_for('home') }}">
+                  <i class="fas fa-home"></i>Home
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link text-white" href="{{ url_for('all_stocks') }}">
+                  <i class="fas fa-list"></i>All Stocks
+                </a>
+              </li>
+              {% if session.get('user') %}
+                <li class="nav-item">
+                  <a class="nav-link text-white" href="{{ url_for('watchlist') }}">
+                    <i class="fas fa-bookmark"></i>Watchlist
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link text-white" href="{{ url_for('logout') }}">
+                    <i class="fas fa-sign-out-alt"></i>Logout ({{ session.get('user') }})
+                  </a>
+                </li>
+              {% else %}
+                <li class="nav-item">
+                  <a class="nav-link text-white" href="{{ url_for('login') }}">
+                    <i class="fas fa-sign-in-alt"></i>Login
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link text-white" href="{{ url_for('signup') }}">
+                    <i class="fas fa-user-plus"></i>Sign Up
+                  </a>
+                </li>
+              {% endif %}
+              <li class="nav-item">
+                <button class="theme-toggle" id="themeToggle">
+                  <i class="fas fa-moon"></i>
+                </button>
+              </li>
+            </ul>
           </div>
         </div>
-        <div class="col-md-6">
-          <div class="card">
-            <div class="card-header losers">
-              <h5 class="mb-0"><i class="fas fa-arrow-down me-2"></i>Top Losers</h5>
-            </div>
-            <div class="card-body">
-              <ul class="list-group" id="top-losers">
-                <li class="list-group-item text-muted">Loading...</li>
-              </ul>
-            </div>
+      </nav>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- Market Summary -->
+    <div class="market-summary fade-in">
+      <div class="summary-card fade-in delay-1">
+        <div class="title"><i class="fas fa-chart-line"></i>NIFTY 50</div>
+        <div class="value" id="nifty-value">Loading...</div>
+        <div class="change" id="nifty-change"><i class="fas fa-sync-alt fa-spin"></i> Updating...</div>
+      </div>
+      <div class="summary-card fade-in delay-2">
+        <div class="title"><i class="fas fa-chart-bar"></i>SENSEX</div>
+        <div class="value" id="sensex-value">Loading...</div>
+        <div class="change" id="sensex-change"><i class="fas fa-sync-alt fa-spin"></i> Updating...</div>
+      </div>
+      <div class="summary-card fade-in delay-3">
+        <div class="title"><i class="fas fa-landmark"></i>NIFTY BANK</div>
+        <div class="value" id="banknifty-value">Loading...</div>
+        <div class="change" id="banknifty-change"><i class="fas fa-sync-alt fa-spin"></i> Updating...</div>
+      </div>
+      <div class="summary-card fade-in delay-4">
+        <div class="title"><i class="fas fa-bolt"></i>INDIA VIX</div>
+        <div class="value" id="vix-value">Loading...</div>
+        <div class="change" id="vix-change"><i class="fas fa-sync-alt fa-spin"></i> Updating...</div>
+      </div>
+    </div>
+
+    <!-- Market Ticker -->
+    <div class="marquee-container fade-in delay-5">
+      <div class="marquee">
+        <span class="market-status">Live Market</span>
+        <div class="marquee-content" id="market-ticker">
+          <span class="updating">Loading real-time market data...</span>
+        </div>
+      </div>
+    </div>
+
+    <h1 class="text-center mb-4 fade-in"><i class="fas fa-chart-line me-2"></i>Stock Market Analysis</h1>
+
+    <!-- Search Form -->
+    <div class="search-container fade-in">
+      <form class="search-form" action="{{ url_for('analyze') }}" method="GET">
+        <input
+          type="text"
+          name="ticker"
+          class="form-control search-input"
+          placeholder="Search for stocks (e.g., INFY, RELIANCE, TCS)..."
+          required
+          aria-label="Stock ticker symbol"
+        >
+        <button class="btn btn-primary search-btn" type="submit">
+          <i class="fas fa-search"></i> Analyze
+        </button>
+      </form>
+    </div>
+
+    <!-- Top Gainers & Losers -->
+    <div class="row mt-4 g-4">
+      <div class="col-lg-6 fade-in delay-1">
+        <div class="card h-100">
+          <div class="card-header gainers">
+            <i class="fas fa-arrow-trend-up"></i>
+            <h5 class="mb-0">Top Gainers</h5>
+          </div>
+          <div class="card-body p-0">
+            <ul class="list-group list-group-flush" id="top-gainers">
+              <li class="list-group-item text-center">
+                <div class="spinner-border text-primary" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6 fade-in delay-2">
+        <div class="card h-100">
+          <div class="card-header losers">
+            <i class="fas fa-arrow-trend-down"></i>
+            <h5 class="mb-0">Top Losers</h5>
+          </div>
+          <div class="card-body p-0">
+            <ul class="list-group list-group-flush" id="top-losers">
+              <li class="list-group-item text-center">
+                <div class="spinner-border text-primary" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+              </li>
+            </ul>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="card shadow-sm mt-5">
-      <div class="card-header">
-        <h5 class="mb-0"><i class="fas fa-fire me-2"></i>Trending Stocks (NSE)</h5>
+    <!-- Trending Stocks -->
+    <div class="card mt-5 fade-in delay-3">
+      <div class="card-header trending">
+        <i class="fas fa-fire"></i>
+        <h5 class="mb-0">Trending Stocks</h5>
       </div>
       <div class="card-body">
-        <div class="row" id="trending-stocks">
-          <p class="text-muted">Loading...</p>
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4" id="trending-stocks">
+          <div class="col">
+            <div class="card stock-card h-100 border-0">
+              <div class="card-body text-center">
+                <div class="spinner-border text-primary" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Market News -->
+    <div class="card mt-5 fade-in delay-4">
+      <div class="card-header" style="background: linear-gradient(135deg, var(--info), #00b4d8); color: white;">
+        <i class="fas fa-newspaper"></i>
+        <h5 class="mb-0">Latest Market News</h5>
+      </div>
+      <div class="card-body">
+        <div class="row" id="market-news">
+          <div class="col-md-6 mb-3">
+            <div class="card h-100">
+              <div class="card-body text-center">
+                <div class="spinner-border text-primary" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <footer>
+    <div class="container text-center">
+      <p class="mb-1 footer-text">&copy; {{ year | default(2025) }} Stock Analyzer. All rights reserved.</p>
+      <p class="footer-text">Made with <i class="fas fa-heart footer-heart"></i> for stock enthusiasts by Tony</p>
+      <div class="mt-2">
+        <a href="#" class="text-white me-3"><i class="fab fa-twitter"></i></a>
+        <a href="#" class="text-white me-3"><i class="fab fa-linkedin"></i></a>
+        <a href="#" class="text-white me-3"><i class="fab fa-github"></i></a>
+        <a href="#" class="text-white"><i class="fas fa-envelope"></i></a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Bootstrap JS Bundle with Popper -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  
   <script>
-    async function fetchTrending() {
-      const res = await fetch('/api/trending');
-      const data = await res.json();
-      const container = document.getElementById('trending-stocks');
-      container.innerHTML = '';
-      data.forEach(stock => {
-        const card = document.createElement('div');
-        card.className = 'col-md-4 mb-3';
-        card.innerHTML = `
-          <div class="card stock-card border-light">
-            <div class="card-body">
-              <h5 class="card-title">${stock.ticker}</h5>
-              <p class="card-text">Price: ₹${stock.price.toFixed(2)}</p>
-              <p class="card-text text-${stock.change >= 0 ? 'success' : 'danger'}">
-                Change: ${stock.change.toFixed(2)}%
-              </p>
-              <a href="/analyze?ticker=${stock.ticker}" class="btn btn-sm btn-outline-primary">Analyze</a>
-            </div>
-          </div>
-        `;
-        container.appendChild(card);
-      });
-    }
-
-    async function fetchGainers() {
-      const res = await fetch('/api/trending');
-      const data = await res.json();
-      const topGainers = data
-        .sort((a, b) => b.change - a.change)
-        .slice(0, 5)
-        .map(stock => `${stock.ticker}: ₹${stock.price.toFixed(2)} (+${stock.change.toFixed(2)}%)`)
-        .join(' 🔺 ');
-      document.getElementById('gainers-marquee').innerHTML = `<span>${topGainers}</span>`;
-    }
-
-    async function fetchTopMovers() {
-      try {
-        const res = await fetch('/api/trending');
-        const data = await res.json();
-
-        // Top Gainers
-        const gainers = data
-          .sort((a, b) => b.change - a.change)
-          .slice(0, 3);
-        const gainersContainer = document.getElementById('top-gainers');
-        gainersContainer.innerHTML = '';
-        gainers.forEach(stock => {
-          const item = document.createElement('li');
-          item.className = 'list-group-item';
-          item.innerHTML = `
-            <div class="d-flex justify-content-between align-items-center">
-              <div>
-                <strong>${stock.ticker}</strong>
-                <p class="mb-0 text-muted">Price: ₹${stock.price.toFixed(2)}</p>
-              </div>
-              <span class="text-success">+${stock.change.toFixed(2)}%</span>
-            </div>
-          `;
-          gainersContainer.appendChild(item);
-        });
-
-        // Top Losers
-        const losers = data
-          .sort((a, b) => a.change - b.change)
-          .slice(0, 3);
-        const losersContainer = document.getElementById('top-losers');
-        losersContainer.innerHTML = '';
-        losers.forEach(stock => {
-          const item = document.createElement('li');
-          item.className = 'list-group-item';
-          item.innerHTML = `
-            <div class="d-flex justify-content-between align-items-center">
-              <div>
-                <strong>${stock.ticker}</strong>
-                <p class="mb-0 text-muted">Price: ₹${stock.price.toFixed(2)}</p>
-              </div>
-              <span class="text-danger">${stock.change.toFixed(2)}%</span>
-            </div>
-          `;
-          losersContainer.appendChild(item);
-        });
-      } catch (error) {
-        console.error('Error fetching top movers:', error);
-        document.getElementById('top-gainers').innerHTML = '<li class="list-group-item text-danger">Error loading data</li>';
-        document.getElementById('top-losers').innerHTML = '<li class="list-group-item text-danger">Error loading data</li>';
+    // Theme Toggle Functionality
+    const themeToggle = document.getElementById('themeToggle');
+    const htmlElement = document.documentElement;
+    
+    // Check for saved theme preference or use preferred color scheme
+    const savedTheme = localStorage.getItem('theme') || 
+                      (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    htmlElement.setAttribute('data-bs-theme', savedTheme);
+    updateThemeIcon(savedTheme);
+    
+    // Toggle theme
+    themeToggle.addEventListener('click', () => {
+      const currentTheme = htmlElement.getAttribute('data-bs-theme');
+      const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+      htmlElement.setAttribute('data-bs-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+      updateThemeIcon(newTheme);
+    });
+    
+    function updateThemeIcon(theme) {
+      const icon = themeToggle.querySelector('i');
+      if (theme === 'dark') {
+        icon.classList.remove('fa-moon');
+        icon.classList.add('fa-sun');
+      } else {
+        icon.classList.remove('fa-sun');
+        icon.classList.add('fa-moon');
       }
     }
-
-    fetchTrending();
-    fetchGainers();
-    fetchTopMovers();
+    
+    // DOM Elements
+    const marketTicker = document.getElementById('market-ticker');
+    const topGainersList = document.getElementById('top-gainers');
+    const topLosersList = document.getElementById('top-losers');
+    const trendingStocksContainer = document.getElementById('trending-stocks');
+    const marketNewsContainer = document.getElementById('market-news');
+    
+    // API Endpoints
+    const TRENDING_API = '/api/trending';
+    const WATCHLIST_API = '/api/watchlist/add';
+    const MARKET_NEWS_API = '/api/news';
+    const INDICES_API = '/api/indices';
+    
+    // Fetch indices data (NIFTY 50, SENSEX, etc.)
+    async function fetchIndicesData() {
+      try {
+        // Show loading state
+        document.querySelectorAll('.summary-card .change').forEach(el => {
+          el.innerHTML = '<i class="fas fa-sync-alt fa-spin"></i> Updating...';
+        });
+        
+        const response = await fetch(INDICES_API);
+        if (!response.ok) throw new Error('Failed to fetch indices data');
+        const data = await response.json();
+        
+        // Update market summary
+        updateMarketSummary(data);
+      } catch (error) {
+        console.error('Error fetching indices:', error);
+        document.querySelectorAll('.summary-card .change').forEach(el => {
+          el.innerHTML = '<i class="fas fa-exclamation-circle"></i> Update failed';
+          el.className = 'change negative';
+        });
+        showAlert('Failed to load market indices. Please try again later.', 'danger');
+      }
+    }
+    
+    // Update market summary with better visual indicators
+    function updateMarketSummary(data) {
+      const indices = data.indices || [];
+      const nifty = indices.find(i => i.name === 'NIFTY 50') || { value: 'N/A', change: 0 };
+      const sensex = indices.find(i => i.name === 'SENSEX') || { value: 'N/A', change: 0 };
+      const banknifty = indices.find(i => i.name === 'NIFTY BANK') || { value: 'N/A', change: 0 };
+      const vix = indices.find(i => i.name === 'INDIA VIX') || { value: 'N/A', change: 0 };
+      
+      // NIFTY 50
+      document.getElementById('nifty-value').textContent = nifty.value || 'N/A';
+      const niftyChangeEl = document.getElementById('nifty-change');
+      niftyChangeEl.innerHTML = nifty.change >= 0 
+        ? `<i class="fas fa-caret-up"></i> +${nifty.change.toFixed(2)}%` 
+        : `<i class="fas fa-caret-down"></i> ${nifty.change.toFixed(2)}%`;
+      niftyChangeEl.className = `change ${nifty.change >= 0 ? 'positive' : 'negative'}`;
+      
+      // SENSEX
+      document.getElementById('sensex-value').textContent = sensex.value || 'N/A';
+      const sensexChangeEl = document.getElementById('sensex-change');
+      sensexChangeEl.innerHTML = sensex.change >= 0 
+        ? `<i class="fas fa-caret-up"></i> +${sensex.change.toFixed(2)}%` 
+        : `<i class="fas fa-caret-down"></i> ${sensex.change.toFixed(2)}%`;
+      sensexChangeEl.className = `change ${sensex.change >= 0 ? 'positive' : 'negative'}`;
+      
+      // NIFTY BANK
+      document.getElementById('banknifty-value').textContent = banknifty.value || 'N/A';
+      const bankniftyChangeEl = document.getElementById('banknifty-change');
+      bankniftyChangeEl.innerHTML = banknifty.change >= 0 
+        ? `<i class="fas fa-caret-up"></i> +${banknifty.change.toFixed(2)}%` 
+        : `<i class="fas fa-caret-down"></i> ${banknifty.change.toFixed(2)}%`;
+      bankniftyChangeEl.className = `change ${banknifty.change >= 0 ? 'positive' : 'negative'}`;
+      
+      // INDIA VIX
+      document.getElementById('vix-value').textContent = vix.value || 'N/A';
+      const vixChangeEl = document.getElementById('vix-change');
+      vixChangeEl.innerHTML = vix.change >= 0 
+        ? `<i class="fas fa-caret-up"></i> +${vix.change.toFixed(2)}%` 
+        : `<i class="fas fa-caret-down"></i> ${vix.change.toFixed(2)}%`;
+      vixChangeEl.className = `change ${vix.change >= 0 ? 'positive' : 'negative'}`;
+      
+      // Add blinking animation temporarily to show update
+      [niftyChangeEl, sensexChangeEl, bankniftyChangeEl, vixChangeEl].forEach(el => {
+        el.classList.add('updating');
+        setTimeout(() => el.classList.remove('updating'), 2000);
+      });
+    }
+    
+    // Fetch trending stocks data
+    async function fetchTrendingStocks() {
+      try {
+        const response = await fetch(TRENDING_API);
+        if (!response.ok) throw new Error('Failed to fetch stock data');
+        const stocks = await response.json();
+        
+        // Update market ticker
+        updateMarketTicker(stocks);
+        
+        // Update top gainers and losers
+        updateTopMovers(stocks);
+        
+        // Render trending stocks
+        renderTrendingStocks(stocks);
+        
+        // Fetch market news
+        fetchMarketNews();
+      } catch (error) {
+        console.error('Error fetching trending stocks:', error);
+        showError('Failed to load stock data. Please try again later.');
+      }
+    }
+    
+    // Update market ticker with top movers
+    function updateMarketTicker(stocks) {
+      const topMovers = stocks
+        .sort((a, b) => Math.abs(b.change) - Math.abs(a.change))
+        .slice(0, 8)
+        .map(stock => {
+          const isGainer = stock.change >= 0;
+          return `<span class="${isGainer ? 'positive' : 'negative'}">${stock.ticker}: ₹${stock.price.toFixed(2)} (${isGainer ? '+' : ''}${stock.change.toFixed(2)}%)</span>`;
+        });
+      
+      marketTicker.innerHTML = topMovers.join(' &bull; ') || 'No market data available';
+    }
+    
+    // Update top movers lists
+    function updateTopMovers(stocks) {
+      // Top Gainers
+      const gainers = stocks
+        .sort((a, b) => b.change - a.change)
+        .slice(0, 5);
+      
+      topGainersList.innerHTML = gainers.length > 0 
+        ? gainers.map(createMoverItem).join('') 
+        : '<li class="list-group-item text-muted">No gainers available</li>';
+      
+      // Top Losers
+      const losers = stocks
+        .sort((a, b) => a.change - b.change)
+        .slice(0, 5);
+      
+      topLosersList.innerHTML = losers.length > 0 
+        ? losers.map(createMoverItem).join('') 
+        : '<li class="list-group-item text-muted">No losers available</li>';
+    }
+    
+    // Create list item for top movers
+    function createMoverItem(stock) {
+      const isGainer = stock.change >= 0;
+      return `
+        <li class="list-group-item">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <span class="ticker">${stock.ticker}</span>
+              <div class="name">${stock.name}</div>
+            </div>
+            <div class="text-end">
+              <div class="price">₹${stock.price.toFixed(2)}</div>
+              <div class="change ${isGainer ? 'positive' : 'negative'}">
+                <i class="fas ${isGainer ? 'fa-caret-up' : 'fa-caret-down'}"></i>
+                ${isGainer ? '+' : ''}${stock.change.toFixed(2)}%
+              </div>
+            </div>
+          </div>
+        </li>
+      `;
+    }
+    
+    // Render trending stocks grid
+    function renderTrendingStocks(stocks) {
+      if (!stocks || stocks.length === 0) {
+        trendingStocksContainer.innerHTML = `
+          <div class="col-12">
+            <div class="alert alert-warning mb-0">No trending stocks available</div>
+          </div>
+        `;
+        return;
+      }
+      
+      trendingStocksContainer.innerHTML = stocks
+        .sort((a, b) => Math.abs(b.change) - Math.abs(a.change))
+        .slice(0, 6) // Show top 6 trending stocks
+        .map(stock => createStockCard(stock))
+        .join('');
+    }
+    
+    // Create stock card element
+    function createStockCard(stock) {
+      const isGainer = stock.change >= 0;
+      const isLoggedIn = {{ 'true' if session.get('user') else 'false' }};
+      
+      return `
+        <div class="col">
+          <div class="card stock-card h-100">
+            <div class="card-body">
+              <h5 class="card-title">${stock.ticker}</h5>
+              <p class="card-text text-muted mb-1">${stock.name}</p>
+              <p class="price">₹${stock.price.toFixed(2)}</p>
+              <span class="change ${isGainer ? 'positive' : 'negative'}">
+                <i class="fas ${isGainer ? 'fa-caret-up' : 'fa-caret-down'}"></i>
+                ${isGainer ? '+' : ''}${stock.change.toFixed(2)}%
+              </span>
+              <div class="d-flex justify-content-between mt-3">
+                <a href="/analyze?ticker=${stock.ticker}" class="btn btn-sm btn-outline-primary">Analyze</a>
+                ${isLoggedIn ? `
+                  <button class="btn btn-sm btn-outline-success" onclick="addToWatchlist('${stock.ticker}')">
+                    <i class="fas fa-plus"></i> Watchlist
+                  </button>
+                ` : ''}
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+    
+    // Fetch market news
+    async function fetchMarketNews() {
+      try {
+        const response = await fetch(MARKET_NEWS_API);
+        if (!response.ok) throw new Error('Failed to fetch news');
+        const news = await response.json();
+        renderMarketNews(news);
+      } catch (error) {
+        console.error('Error fetching news:', error);
+        marketNewsContainer.innerHTML = `
+          <div class="col-12">
+            <div class="alert alert-info mb-0">No recent market news available</div>
+          </div>
+        `;
+      }
+    }
+    
+    // Render market news
+    function renderMarketNews(news) {
+      if (!news || news.length === 0) {
+        marketNewsContainer.innerHTML = `
+          <div class="col-12">
+            <div class="alert alert-info mb-0">No recent market news available</div>
+          </div>
+        `;
+        return;
+      }
+      
+      marketNewsContainer.innerHTML = news
+        .map(item => `
+          <div class="col-md-6 mb-3">
+            <div class="card news-card h-100">
+              <div class="card-body">
+                <h6 class="card-title">${item.title}</h6>
+                <p class="card-text">${item.summary}</p>
+                <small class="news-time"><i class="far fa-clock me-1"></i>${item.time}</small>
+              </div>
+            </div>
+          </div>
+        `)
+        .join('');
+    }
+    
+    // Add stock to watchlist
+    async function addToWatchlist(ticker) {
+      try {
+        const response = await fetch(WATCHLIST_API, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ ticker })
+        });
+        
+        const result = await response.json();
+        
+        if (!response.ok) {
+          throw new Error(result.error || 'Failed to add to watchlist');
+        }
+        
+        showAlert(`Successfully added ${ticker} to your watchlist!`, 'success');
+      } catch (error) {
+        showAlert(`Error: ${error.message}`, 'danger');
+        console.error('Watchlist error:', error);
+      }
+    }
+    
+    // Show alert message
+    function showAlert(message, type) {
+      const alert = document.createElement('div');
+      alert.className = `alert alert-${type} position-fixed top-0 end-0 m-3`;
+      alert.style.zIndex = '1100';
+      alert.style.maxWidth = '350px';
+      alert.style.animation = 'fadeIn 0.3s ease forwards';
+      alert.innerHTML = `
+        <div class="d-flex align-items-center">
+          <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} me-2"></i>
+          <div>${message}</div>
+          <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
+        </div>
+      `;
+      
+      document.body.appendChild(alert);
+      
+      // Auto-dismiss after 5 seconds
+      setTimeout(() => {
+        alert.style.animation = 'fadeOut 0.3s ease forwards';
+        setTimeout(() => alert.remove(), 300);
+      }, 5000);
+      
+      // Manual dismiss
+      alert.querySelector('.btn-close').addEventListener('click', () => {
+        alert.style.animation = 'fadeOut 0.3s ease forwards';
+        setTimeout(() => alert.remove(), 300);
+      });
+    }
+    
+    // Show error message
+    function showError(message) {
+      trendingStocksContainer.innerHTML = `
+        <div class="col-12">
+          <div class="alert alert-danger mb-0">${message}</div>
+        </div>
+      `;
+      topGainersList.innerHTML = `<li class="list-group-item text-muted">${message}</li>`;
+      topLosersList.innerHTML = `<li class="list-group-item text-muted">${message}</li>`;
+    }
+    
+    // Initialize when DOM is loaded
+    document.addEventListener('DOMContentLoaded', () => {
+      fetchIndicesData();
+      fetchTrendingStocks();
+      // Refresh data every 2 minutes for real-time feel
+      setInterval(fetchTrendingStocks, 2 * 60 * 1000);
+      setInterval(fetchIndicesData, 2 * 60 * 1000);
+    });
   </script>
-  <footer class="bg-dark text-white text-center py-4 mt-5">
-  <div class="container">
-    <p class="mb-1">&copy; {{ year | default(2025) }} Stock Analyzer. All rights reserved.</p>
-    <small>Made with ❤️ for stock enthusiasts.</small>
-  </div>
-</footer>
-
 </body>
 </html>

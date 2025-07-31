@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login - Stock Analyzer</title>
+  <title>Sign Up - Stock Analyzer</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -16,6 +16,7 @@
       --light-bg: #f8fafc;
       --card-bg: rgba(255, 255, 255, 0.96);
       --error-bg: rgba(220, 53, 69, 0.1);
+      --success-bg: rgba(25, 135, 84, 0.1);
     }
     
     body {
@@ -32,7 +33,7 @@
       padding: 0;
     }
 
-    .login-container {
+    .signup-container {
       display: flex;
       justify-content: center;
       align-items: center;
@@ -41,9 +42,9 @@
       width: 100%;
     }
 
-    .login-card {
+    .signup-card {
       width: 100%;
-      max-width: 440px;
+      max-width: 480px;
       border-radius: 16px;
       box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
       padding: 2.5rem;
@@ -55,12 +56,12 @@
       border: 1px solid rgba(255, 255, 255, 0.2);
     }
 
-    .login-card:hover {
+    .signup-card:hover {
       transform: translateY(-5px);
       box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.2);
     }
 
-    .login-card::before {
+    .signup-card::before {
       content: '';
       position: absolute;
       top: -50%;
@@ -72,7 +73,7 @@
       z-index: -1;
     }
 
-    .login-card h3 {
+    .signup-card h3 {
       color: var(--secondary-color);
       font-weight: 700;
       font-size: 1.9rem;
@@ -83,7 +84,7 @@
       width: 100%;
     }
 
-    .login-card h3::after {
+    .signup-card h3::after {
       content: '';
       position: absolute;
       bottom: -10px;
@@ -156,6 +157,18 @@
       animation: fadeIn 0.3s ease;
     }
 
+    .success-message {
+      color: #198754;
+      font-size: 0.9rem;
+      margin-top: 0.75rem;
+      text-align: center;
+      background: var(--success-bg);
+      padding: 0.8rem;
+      border-radius: 8px;
+      border-left: 4px solid #198754;
+      animation: fadeIn 0.3s ease;
+    }
+
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(-10px); }
       to { opacity: 1; transform: translateY(0); }
@@ -185,6 +198,51 @@
       font-size: 0.83rem;
       color: #64748b;
       margin-top: 0.3rem;
+    }
+
+    .password-strength {
+      height: 4px;
+      background: #e2e8f0;
+      border-radius: 2px;
+      margin-top: 0.5rem;
+      overflow: hidden;
+    }
+
+    .password-strength-bar {
+      height: 100%;
+      width: 0;
+      transition: width 0.3s ease, background 0.3s ease;
+    }
+
+    .password-requirements {
+      margin-top: 0.5rem;
+      font-size: 0.8rem;
+      color: #64748b;
+    }
+
+    .password-requirements li {
+      margin-bottom: 0.25rem;
+      list-style-type: none;
+      position: relative;
+      padding-left: 1.5rem;
+    }
+
+    .password-requirements li.valid::before {
+      content: '\f00c';
+      font-family: 'Font Awesome 6 Free';
+      font-weight: 900;
+      color: #198754;
+      position: absolute;
+      left: 0;
+    }
+
+    .password-requirements li.invalid::before {
+      content: '\f00d';
+      font-family: 'Font Awesome 6 Free';
+      font-weight: 900;
+      color: #dc3545;
+      position: absolute;
+      left: 0;
     }
 
     .quote-container {
@@ -273,12 +331,12 @@
     }
 
     @media (max-width: 768px) {
-      .login-card {
+      .signup-card {
         padding: 2rem 1.5rem;
         margin: 0 1rem;
       }
       
-      .login-card h3 {
+      .signup-card h3 {
         font-size: 1.7rem;
       }
       
@@ -288,11 +346,11 @@
     }
 
     @media (max-width: 576px) {
-      .login-card {
+      .signup-card {
         padding: 1.75rem 1.25rem;
       }
       
-      .login-card h3 {
+      .signup-card h3 {
         font-size: 1.6rem;
         margin-bottom: 1.5rem;
       }
@@ -334,23 +392,49 @@
           <a href="{{ url_for('all_stocks') }}" class="nav-link-header">
             <i class="fas fa-list me-1"></i>All Stocks
           </a>
-          <a href="{{ url_for('signup') }}" class="nav-link-header">
-            <i class="fas fa-user-plus me-1"></i>Sign Up
+          <a href="{{ url_for('login') }}" class="nav-link-header">
+            <i class="fas fa-sign-in-alt me-1"></i>Login
           </a>
         </div>
       </nav>
     </div>
   </header>
 
-  <div class="login-container">
-    <div class="login-card floating">
-      <h3 class="text-center"><i class="fas fa-sign-in-alt me-2"></i>Welcome Back</h3>
+  <div class="signup-container">
+    <div class="signup-card floating">
+      <h3 class="text-center"><i class="fas fa-user-plus me-2"></i>Create Account</h3>
       {% if error %}
         <div class="error-message mb-3">
           <i class="fas fa-exclamation-circle me-2"></i>{{ error }}
         </div>
       {% endif %}
-      <form method="POST" action="{{ url_for('login') }}">
+      {% if success %}
+        <div class="success-message mb-3">
+          <i class="fas fa-check-circle me-2"></i>{{ success }}
+        </div>
+      {% endif %}
+      <form method="POST" action="{{ url_for('signup') }}" id="signupForm">
+        <div class="mb-3">
+          <label for="fullname" class="form-label fw-medium">Full Name</label>
+          <div class="input-group">
+            <span class="input-group-text">
+              <i class="fas fa-user-tag"></i>
+            </span>
+            <input
+              type="text"
+              name="fullname"
+              id="fullname"
+              class="form-control"
+              placeholder="Enter your full name"
+              required
+              minlength="3"
+              maxlength="50"
+              aria-describedby="fullnameHelp"
+            >
+          </div>
+          <small id="fullnameHelp" class="form-text">Enter your full name (3-50 characters)</small>
+        </div>
+        
         <div class="mb-3">
           <label for="username" class="form-label fw-medium">Username</label>
           <div class="input-group">
@@ -362,16 +446,36 @@
               name="username"
               id="username"
               class="form-control"
-              placeholder="Enter your username"
+              placeholder="Enter a username"
               required
               pattern="[a-zA-Z0-9_]{3,20}"
               title="Username must be 3-20 characters, alphanumeric or underscore"
               aria-describedby="usernameHelp"
             >
           </div>
-          <small id="usernameHelp" class="form-text">Enter your registered username</small>
+          <small id="usernameHelp" class="form-text">3-20 characters, letters, numbers or underscore</small>
         </div>
-        <div class="mb-4">
+        
+        <div class="mb-3">
+          <label for="email" class="form-label fw-medium">Email Address</label>
+          <div class="input-group">
+            <span class="input-group-text">
+              <i class="fas fa-envelope"></i>
+            </span>
+            <input
+              type="email"
+              name="email"
+              id="email"
+              class="form-control"
+              placeholder="Enter your email"
+              required
+              aria-describedby="emailHelp"
+            >
+          </div>
+          <small id="emailHelp" class="form-text">We'll never share your email with anyone else</small>
+        </div>
+        
+        <div class="mb-3">
           <label for="password" class="form-label fw-medium">Password</label>
           <div class="input-group">
             <span class="input-group-text">
@@ -382,22 +486,68 @@
               name="password"
               id="password"
               class="form-control"
-              placeholder="Enter your password"
+              placeholder="Create a password"
               required
+              minlength="8"
               aria-describedby="passwordHelp"
+              oninput="checkPasswordStrength(this.value)"
             >
-            <button type="button" class="input-group-text" onclick="togglePassword()">
+            <button type="button" class="input-group-text" onclick="togglePassword('password')">
               <i class="fas fa-eye" id="togglePasswordIcon"></i>
             </button>
           </div>
-          <small id="passwordHelp" class="form-text">Enter your secure password</small>
+          <div class="password-strength">
+            <div class="password-strength-bar" id="passwordStrengthBar"></div>
+          </div>
+          <div class="password-requirements" id="passwordRequirements">
+            <ul>
+              <li id="lengthReq" class="invalid">At least 8 characters</li>
+              <li id="upperReq" class="invalid">At least 1 uppercase letter</li>
+              <li id="lowerReq" class="invalid">At least 1 lowercase letter</li>
+              <li id="numberReq" class="invalid">At least 1 number</li>
+              <li id="specialReq" class="invalid">At least 1 special character</li>
+            </ul>
+          </div>
         </div>
-        <button type="submit" class="btn btn-primary w-100 mb-3">
-          <i class="fas fa-sign-in-alt me-2"></i>Login
+        
+        <div class="mb-4">
+          <label for="confirmPassword" class="form-label fw-medium">Confirm Password</label>
+          <div class="input-group">
+            <span class="input-group-text">
+              <i class="fas fa-lock"></i>
+            </span>
+            <input
+              type="password"
+              name="confirmPassword"
+              id="confirmPassword"
+              class="form-control"
+              placeholder="Confirm your password"
+              required
+              minlength="8"
+              aria-describedby="confirmPasswordHelp"
+              oninput="checkPasswordMatch()"
+            >
+            <button type="button" class="input-group-text" onclick="togglePassword('confirmPassword')">
+              <i class="fas fa-eye" id="toggleConfirmPasswordIcon"></i>
+            </button>
+          </div>
+          <small id="confirmPasswordHelp" class="form-text">Re-enter your password</small>
+          <div id="passwordMatch" class="form-text"></div>
+        </div>
+        
+        <div class="mb-3 form-check">
+          <input type="checkbox" class="form-check-input" id="termsCheck" required>
+          <label class="form-check-label small" for="termsCheck">
+            I agree to the <a href="#" class="text-primary">Terms of Service</a> and <a href="#" class="text-primary">Privacy Policy</a>
+          </label>
+        </div>
+        
+        <button type="submit" class="btn btn-primary w-100 mb-3" id="submitBtn">
+          <i class="fas fa-user-plus me-2"></i>Create Account
         </button>
         <div class="text-center mt-3">
-          <a href="{{ url_for('signup') }}" class="nav-link">
-            <i class="fas fa-user-plus me-1"></i>Don't have an account? Sign Up
+          <a href="{{ url_for('login') }}" class="nav-link">
+            <i class="fas fa-sign-in-alt me-1"></i>Already have an account? Login
           </a>
         </div>
       </form>
@@ -417,9 +567,9 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    function togglePassword() {
-      const passwordInput = document.getElementById('password');
-      const toggleIcon = document.getElementById('togglePasswordIcon');
+    function togglePassword(fieldId) {
+      const passwordInput = document.getElementById(fieldId);
+      const toggleIcon = document.getElementById(`toggle${fieldId === 'password' ? 'Password' : 'ConfirmPassword'}Icon`);
       if (passwordInput.type === 'password') {
         passwordInput.type = 'text';
         toggleIcon.classList.remove('fa-eye');
@@ -428,6 +578,85 @@
         passwordInput.type = 'password';
         toggleIcon.classList.remove('fa-eye-slash');
         toggleIcon.classList.add('fa-eye');
+      }
+    }
+
+    function checkPasswordStrength(password) {
+      const strengthBar = document.getElementById('passwordStrengthBar');
+      const lengthReq = document.getElementById('lengthReq');
+      const upperReq = document.getElementById('upperReq');
+      const lowerReq = document.getElementById('lowerReq');
+      const numberReq = document.getElementById('numberReq');
+      const specialReq = document.getElementById('specialReq');
+      
+      // Reset requirements
+      lengthReq.className = 'invalid';
+      upperReq.className = 'invalid';
+      lowerReq.className = 'invalid';
+      numberReq.className = 'invalid';
+      specialReq.className = 'invalid';
+      
+      let strength = 0;
+      
+      // Check length
+      if (password.length >= 8) {
+        strength += 20;
+        lengthReq.className = 'valid';
+      }
+      
+      // Check for uppercase letters
+      if (/[A-Z]/.test(password)) {
+        strength += 20;
+        upperReq.className = 'valid';
+      }
+      
+      // Check for lowercase letters
+      if (/[a-z]/.test(password)) {
+        strength += 20;
+        lowerReq.className = 'valid';
+      }
+      
+      // Check for numbers
+      if (/[0-9]/.test(password)) {
+        strength += 20;
+        numberReq.className = 'valid';
+      }
+      
+      // Check for special characters
+      if (/[^A-Za-z0-9]/.test(password)) {
+        strength += 20;
+        specialReq.className = 'valid';
+      }
+      
+      // Update strength bar
+      strengthBar.style.width = strength + '%';
+      
+      // Update color based on strength
+      if (strength < 40) {
+        strengthBar.style.backgroundColor = '#dc3545'; // Red
+      } else if (strength < 80) {
+        strengthBar.style.backgroundColor = '#fd7e14'; // Orange
+      } else {
+        strengthBar.style.backgroundColor = '#198754'; // Green
+      }
+      
+      checkPasswordMatch();
+    }
+    
+    function checkPasswordMatch() {
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+      const matchText = document.getElementById('passwordMatch');
+      
+      if (confirmPassword.length === 0) {
+        matchText.textContent = '';
+        matchText.style.color = '';
+      } else if (password === confirmPassword) {
+        matchText.innerHTML = '<i class="fas fa-check-circle me-1"></i> Passwords match';
+        matchText.style.color = '#198754';
+      } else {
+        matchText.innerHTML = '<i class="fas fa-times-circle me-1"></i> Passwords do not match';
+        matchText.style.color = '#dc3545';
       }
     }
 
@@ -466,7 +695,7 @@
       setInterval(displayQuote, 7000);
       
       // Add animation to form elements
-      const formElements = document.querySelectorAll('.form-control, .btn, .input-group-text');
+      const formElements = document.querySelectorAll('.form-control, .btn, .input-group-text, .form-check-input');
       formElements.forEach((el, index) => {
         el.style.opacity = '0';
         el.style.transform = 'translateY(20px)';
@@ -475,6 +704,26 @@
           el.style.opacity = '1';
           el.style.transform = 'translateY(0)';
         }, 100 + (index * 100));
+      });
+      
+      // Form validation
+      const signupForm = document.getElementById('signupForm');
+      signupForm.addEventListener('submit', function(e) {
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        const termsChecked = document.getElementById('termsCheck').checked;
+        
+        if (password !== confirmPassword) {
+          e.preventDefault();
+          document.getElementById('passwordMatch').innerHTML = '<i class="fas fa-times-circle me-1"></i> Passwords must match';
+          document.getElementById('passwordMatch').style.color = '#dc3545';
+          document.getElementById('confirmPassword').focus();
+        }
+        
+        if (!termsChecked) {
+          e.preventDefault();
+          document.getElementById('termsCheck').focus();
+        }
       });
     });
   </script>

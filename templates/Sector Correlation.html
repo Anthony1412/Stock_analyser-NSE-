@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sector Correlation | Stock Analyzer Pro</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <!-- D3.js for visualization -->
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    /* (Previous CSS styles remain the same) */
+    
+    /* Sector Correlation Specific Styles */
+    .correlation-container {
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+      height: 600px;
+      position: relative;
+    }
+    
+    #correlationChart {
+      width: 100%;
+      height: 100%;
+    }
+    
+    .sector-node {
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .sector-node:hover {
+      filter: brightness(1.1);
+    }
+    
+    .sector-link {
+      stroke-opacity: 0.6;
+    }
+    
+    .sector-label {
+      font-family: 'Inter', sans-serif;
+      font-weight: 500;
+      font-size: 0.8rem;
+      fill: var(--text-color);
+    }
+    
+    .strength-indicator {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: var(--card-bg);
+      padding: 0.5rem 1rem;
+      border-radius: 50px;
+      border: 1px solid var(--border-color);
+      font-size: 0.8rem;
+    }
+    
+    .strength-meter {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-right: 5px;
+    }
+    
+    .realtime-controls {
+      position: absolute;
+      top: 1rem;
+      left: 1rem;
+      z-index: 10;
+    }
+  </style>
+</head>
+<body>
+  <header class="py-2 py-lg-3">
+    <div class="container">
+      <nav class="navbar navbar-expand-lg">
+        <div class="container-fluid">
+          <a class="navbar-brand text-white" href="{{ url_for('home') }}">
+            <i class="fas fa-chart-line"></i>Stock Analyzer Pro
+          </a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto align-items-lg-center">
+              <li class="nav-item">
+                <a class="nav-link text-white" href="{{ url_for('home') }}">
+                  <i class="fas fa-home"></i>Home
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link text-white" href="{{ url_for('all_stocks') }}">
+                  <i class="fas fa-database"></i>All Stocks
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link text-white active-nav" href="{{ url_for('sector_correlation') }}">
+                  <i class="fas fa-project-diagram"></i>Sector Correlation
+                </a>
+              </li>
+              {% if session.get('user') %}
+                <li class="nav-item">
+                  <a class="nav-link text-white" href="{{ url_for('watchlist') }}">
+                    <i class="fas fa-bookmark"></i>Watchlist
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link text-white" href="{{ url_for('logout') }}">
+                    <i class="fas fa-sign-out-alt"></i>Logout ({{ session.get('user') }})
+                  </a>
+                </li>
+              {% else %}
+                <li class="nav-item">
+                  <a class="nav-link text-white" href="{{ url_for('login') }}">
+                    <i class="fas fa-sign-in-alt"></i>Login
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link text-white" href="{{ url_for('signup') }}">
+                    <i class="fas fa-user-plus"></i>Sign Up
+                  </a>
+                </li>
+              {% endif %}
+              <li class="nav-item">
+                <button class="theme-toggle" id="themeToggle">
+                  <i class="fas fa-moon"></i>
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2><i class="fas fa-project-diagram me-2"></i>Sector Correlation 
+        <span class="realtime-indicator">
+          <span class="pulse"></span>LIVE
+        </span>
+      </h2>
+      <div class="d-flex align-items-center">
+        <span class="badge bg-primary me-2" id="lastUpdated">Loading...</span>
+      </div>
+    </div>
+
+    <div class="alert alert-info">
+      <i class="fas fa-info-circle me-2"></i>
+      This visualization shows how different market sectors influence each other in real-time. 
+      Thicker lines indicate stronger correlations.
+    </div>
+
+    <div class="correlation-container">
+      <div class="realtime-controls">
+        <div class="btn-group btn-group-sm">
+          <button class="btn btn-outline-primary" id="pauseResumeBtn">
+            <i class="fas fa-pause"></i> Pause
+          </button>
+          <button class="btn btn-outline-primary" onclick="refreshCorrelationData()">
+            <i class="fas fa-sync-alt"></i> Refresh
+          </button>
+        </div>
+      </div>
+      <div class="strength-indicator">
+        <span class="strength-meter bg-success"></span> Strong
+        <span class="strength-meter bg-warning mx-2"></span> Medium
+        <span class="strength-meter bg-danger"></span> Weak
+      </div>
+      <div id="correlationChart"></div>
+    </div>
+
+    <div class="row mt-4">
+      <div class="col-md-6">
+        <div class="card h-100">
+          <div class="card-header bg-primary text-white">
+            <i class="fas fa-lightbulb me-2"></i>How to Interpret
+          </div>
+          <div class="card-body">
+            <ul class="list-group list-group-flush">
+              <li class="list-group-item">
+                <strong>Node Size:</strong> Represents sector market capitalization
+              </li>
+              <li class="list-group-item">
+                <strong>Line Thickness:</strong> Shows correlation strength
+              </li>
+              <li class="list-group-item">
+                <strong>Line Color:</strong> Green = positive, Red = negative correlation
+              </li>
+              <li class="list-group-item">
+                <strong>Click a sector</strong> to see detailed correlations
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card h-100">
+          <div class="card-header bg-primary text-white">
+            <i class="fas fa-chart-line me-2"></i>Sector Performance
+          </div>
+          <div class="card-body">
+            <div id="sectorPerformanceChart" style="height: 250px;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="py-4 mt-5">
+    <div class="container text-center">
+      <p class="mb-1">&copy; {{ year | default(2025) }} Stock Analyzer Pro. All rights reserved.</p>
+      <p class="text-muted small">Made with <i class="fas fa-heart text-danger"></i> for traders and investors</p>
+    </div>
+  </footer>
+
+  <!-- Bootstrap JS Bundle with Popper -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <script>
+    // Theme Toggle Functionality (same as before)
+    const themeToggle = document.getElementById('themeToggle');
+    const htmlElement = document.documentElement;
+    
+    // Check for saved theme preference or use preferred color scheme
+    const savedTheme = localStorage.getItem('theme') || 
+                      (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    htmlElement.setAttribute('data-bs-theme', savedTheme);
+    updateThemeIcon(savedTheme);
+    
+    // Toggle theme
+    themeToggle.addEventListener('click', () => {
+      const currentTheme = htmlElement.getAttribute('data-bs-theme');
+      const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+      htmlElement.setAttribute('data-bs-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+      updateThemeIcon(newTheme);
+      updateChartColors();
+    });
+    
+    function updateThemeIcon(theme) {
+      const icon = themeToggle.querySelector('i');
+      if (theme === 'dark') {
+        icon.classList.remove('fa-moon');
+        icon.classList.add('fa-sun');
+      } else {
+        icon.classList.remove('fa-sun');
+        icon.classList.add('fa-moon');
+      }
+    }
+
+    // Sector Correlation Visualization
+    let correlationData = [];
+    let realtimeUpdateInterval;
+    let isPaused = false;
+    const svgWidth = document.querySelector('.correlation-container').clientWidth;
+    const svgHeight = document.querySelector('.correlation-container').clientHeight;
+    
+    // Initialize the chart
+    function initCorrelationChart() {
+      fetch('/api/sector-correlation')
+        .then(response => response.json())
+        .then(data => {
+          correlationData = data;
+          updateLastUpdated();
+          renderCorrelationChart();
+          renderSectorPerformanceChart();
+          startRealtimeUpdates();
+        })
+        .catch(error => {
+          console.error('Error loading correlation data:', error);
+          showAlert('Failed to load sector correlation data', 'danger');
+        });
+    }
+    
+    // Render the force-directed graph
+    function renderCorrelationChart() {
+      const svg = d3.select("#correlationChart")
+        .html('') // Clear previous chart
+        .append("svg")
+        .attr("width", "100%")
+        .attr("height", "100%")
+        .attr("viewBox", [0, 0, svgWidth, svgHeight]);
+      
+      // Create a group for zoom/pan
+      const g = svg.append("g");
+      
+      // Create the simulation
+      const simulation = d3.forceSimulation(correlationData.nodes)
+        .force("link", d3.forceLink(correlationData.links).id(d => d.id).distance(100))
+        .force("charge", d3.forceManyBody().strength(-500))
+        .force("center", d3.forceCenter(svgWidth / 2, svgHeight / 2))
+        .force("collision", d3.forceCollide().radius(d => d.size / 2 + 10));
+      
+      // Create links
+      const link = g.append("g")
+        .selectAll("line")
+        .data(correlationData.links)
+        .join("line")
+        .attr("class", "sector-link")
+        .attr("stroke", d => d.value > 0 ? "#4cc9f0" : "#f72585")
+        .attr("stroke-width", d => Math.abs(d.value) * 3)
+        .attr("stroke-opacity", 0.6);
+      
+      // Create nodes
+      const node = g.append("g")
+        .selectAll("circle")
+        .data(correlationData.nodes)
+        .join("circle")
+        .attr("class", "sector-node")
+        .attr("r", d => d.size)
+        .attr("fill", d => d.color)
+        .call(drag(simulation))
+        .on("click", handleSectorClick);
+      
+      // Add labels
+      const label = g.append("g")
+        .selectAll("text")
+        .data(correlationData.nodes)
+        .join("text")
+        .attr("class", "sector-label")
+        .attr("dy", -15)
+        .text(d => d.id)
+        .attr("text-anchor", "middle");
+      
+      // Update positions on each tick
+      simulation.on("tick", () => {
+        link
+          .attr("x1", d => d.source.x)
+          .attr("y1", d => d.source.y)
+          .attr("x2", d => d.target.x)
+          .attr("y2", d => d.target.y);
+        
+        node
+          .attr("cx", d => d.x)
+          .attr("cy", d => d.y);
+        
+        label
+          .attr("x", d => d.x)
+          .attr("y", d => d.y);
+      });
+      
+      // Add zoom/pan functionality
+      svg.call(d3.zoom()
+        .extent([[0, 0], [svgWidth, svgHeight]])
+        .scaleExtent([0.5, 3])
+        .on("zoom", (event) => {
+          g.attr("transform", event.transform);
+        }));
+    }
+    
+    // Drag behavior for nodes
+    function drag(simulation) {
+      function dragstarted(event) {
+        if (!event.active) simulation.alphaTarget(0.3).restart();
+        event.subject.fx = event.subject.x;
+        event.subject.fy = event.subject.y;
+      }
+      
+      function dragged(event) {
+        event.subject.fx = event.x;
+        event.subject.fy = event.y;
+      }
+      
+      function dragended(event) {
+        if (!event.active) simulation.alphaTarget(0);
+        event.subject.fx = null;
+        event.subject.fy = null;
+      }
+      
+      return d3.drag()
+        .on("start", dragstarted)
+        .on("drag", dragged)
+        .on("end", dragended);
+    }
+    
+    // Handle sector click
+    function handleSectorClick(event, d) {
+      // Highlight selected sector
+      d3.selectAll(".sector-node").attr("stroke", null);
+      d3.select(event.currentTarget).attr("stroke", "#fff").attr("stroke-width", 2);
+      
+      // Show detailed correlations for this sector
+      const sectorCorrelations = correlationData.links
+        .filter(link => link.source.id === d.id || link.target.id === d.id)
+        .map(link => {
+          const otherSector = link.source.id === d.id ? link.target : link.source;
+          return {
+            sector: otherSector.id,
+            correlation: link.value,
+            strength: Math.abs(link.value)
+          };
+        })
+        .sort((a, b) => b.strength - a.strength);
+      
+      // Display in a modal or tooltip (simplified for this example)
+      console.log(`Correlations for ${d.id}:`, sectorCorrelations);
+      showAlert(`Showing correlations for ${d.id} sector`, 'info');
+    }
+    
+    // Render sector performance chart
+    function renderSectorPerformanceChart() {
+      // This would be replaced with actual chart rendering code
+      // For now, we'll just display a placeholder
+      document.getElementById('sectorPerformanceChart').innerHTML = `
+        <div class="text-center py-5">
+          <i class="fas fa-chart-line fa-3x text-primary mb-3"></i>
+          <p>Sector performance trends will be displayed here</p>
+        </div>
+      `;
+    }
+    
+    // Start real-time updates
+    function startRealtimeUpdates() {
+      if (realtimeUpdateInterval) {
+        clearInterval(realtimeUpdateInterval);
+      }
+      
+      realtimeUpdateInterval = setInterval(() => {
+        if (!isPaused) {
+          refreshCorrelationData();
+        }
+      }, 30000); // Update every 30 seconds
+    }
+    
+    // Refresh correlation data
+    function refreshCorrelationData() {
+      fetch('/api/sector-correlation')
+        .then(response => response.json())
+        .then(data => {
+          correlationData = data;
+          updateLastUpdated();
+          renderCorrelationChart();
+          renderSectorPerformanceChart();
+        })
+        .catch(error => {
+          console.error('Error refreshing correlation data:', error);
+        });
+    }
+    
+    // Update last updated time
+    function updateLastUpdated() {
+      const now = new Date();
+      document.getElementById('lastUpdated').textContent = 
+        `Updated: ${now.toLocaleTimeString()}`;
+    }
+    
+    // Pause/resume real-time updates
+    document.getElementById('pauseResumeBtn').addEventListener('click', function() {
+      isPaused = !isPaused;
+      this.innerHTML = isPaused ? 
+        '<i class="fas fa-play"></i> Resume' : 
+        '<i class="fas fa-pause"></i> Pause';
+      this.classList.toggle('btn-outline-primary');
+      this.classList.toggle('btn-outline-warning');
+    });
+    
+    // Update chart colors when theme changes
+    function updateChartColors() {
+      const textColor = getComputedStyle(document.documentElement)
+        .getPropertyValue('--text-color');
+      
+      d3.selectAll(".sector-label")
+        .attr("fill", textColor);
+    }
+    
+    // Show alert message
+    function showAlert(message, type) {
+      const alert = document.createElement('div');
+      alert.className = `alert alert-${type} position-fixed top-0 end-0 m-3`;
+      alert.style.zIndex = '1100';
+      alert.style.maxWidth = '350px';
+      alert.style.animation = 'fadeIn 0.3s ease forwards';
+      alert.innerHTML = `
+        <div class="d-flex align-items-center">
+          <i class="fas ${type === 'success' ? 'fa-check-circle' : 
+                         type === 'danger' ? 'fa-exclamation-circle' : 
+                         'fa-info-circle'} me-2"></i>
+          <div>${message}</div>
+          <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
+        </div>
+      `;
+      
+      document.body.appendChild(alert);
+      
+      // Auto-dismiss after 5 seconds
+      setTimeout(() => {
+        alert.style.animation = 'fadeOut 0.3s ease forwards';
+        setTimeout(() => alert.remove(), 300);
+      }, 5000);
+      
+      // Manual dismiss
+      alert.querySelector('.btn-close').addEventListener('click', () => {
+        alert.style.animation = 'fadeOut 0.3s ease forwards';
+        setTimeout(() => alert.remove(), 300);
+      });
+    }
+    
+    // Initialize when DOM is loaded
+    document.addEventListener('DOMContentLoaded', () => {
+      initCorrelationChart();
+      
+      // Clean up interval when page unloads
+      window.addEventListener('beforeunload', () => {
+        if (realtimeUpdateInterval) {
+          clearInterval(realtimeUpdateInterval);
+        }
+      });
+    });
+  </script>
+</body>
+</html>

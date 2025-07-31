@@ -1,0 +1,11 @@
+{
+  "nodes": [
+    {"id": "Banking", "size": 40, "color": "#4cc9f0"},
+    {"id": "IT", "size": 35, "color": "#f72585"},
+    ...
+  ],
+  "links": [
+    {"source": "Banking", "target": "IT", "value": 0.75},
+    ...
+  ]
+}
